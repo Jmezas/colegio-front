@@ -18,6 +18,38 @@
             color: white;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
+        
+        /* Responsive Sidebar */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                height: 100vh;
+                z-index: 50;
+                transition: left 0.3s ease-in-out;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
+        
+        /* Scroll horizontal para tablas en móvil */
+        @media (max-width: 640px) {
+            .table-container {
+                overflow-x: auto;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800">
@@ -52,7 +84,10 @@
 
     <section id="view-dashboard" class="hidden-section h-screen flex overflow-hidden fade-in">
         
-        <aside class="w-64 bg-slate-900 text-white flex flex-col flex-shrink-0">
+        <!-- Overlay para cerrar sidebar en móvil -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+        
+        <aside class="sidebar w-64 bg-slate-900 text-white flex flex-col flex-shrink-0">
             <div class="p-6 border-b border-slate-700 flex items-center gap-3">
                 <i class="fas fa-dna text-blue-400 text-xl"></i>
                 <span class="font-bold text-lg">CBP System</span>
@@ -81,27 +116,33 @@
         </aside>
 
         <main class="flex-1 overflow-y-auto bg-slate-50 relative">
-            <header class="bg-white shadow-sm border-b px-8 py-4 flex justify-between items-center sticky top-0 z-20">
-                <h2 id="page-title" class="text-2xl font-bold text-slate-800">Panel de Control</h2>
-                <button onclick="logout()" class="text-red-500 hover:text-red-700 text-sm font-bold">
-                    <i class="fas fa-sign-out-alt mr-1"></i> Salir
+            <header class="bg-white shadow-sm border-b px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-20">
+                <div class="flex items-center gap-4">
+                    <!-- Botón hamburguesa para móvil -->
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-700 text-xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 id="page-title" class="text-xl md:text-2xl font-bold text-slate-800">Panel de Control</h2>
+                </div>
+                <button onclick="logout()" class="text-red-500 hover:text-red-700 text-xs md:text-sm font-bold">
+                    <i class="fas fa-sign-out-alt mr-1"></i> <span class="hidden sm:inline">Salir</span>
                 </button>
             </header>
 
-            <div class="p-8">
+            <div class="p-4 md:p-8">
 
                 <div id="module-reportes" class="module-section">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+                        <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
                             <p class="text-slate-500 text-sm">Colegiados Activos</p>
-                            <h3 class="text-3xl font-bold">12,450</h3>
+                            <h3 class="text-2xl md:text-3xl font-bold">12,450</h3>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
+                        <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
                             <p class="text-slate-500 text-sm">Habilitados</p>
-                            <h3 class="text-3xl font-bold">8,210</h3>
+                            <h3 class="text-2xl md:text-3xl font-bold">8,210</h3>
                         </div>
                          </div>
-                    <div class="bg-white p-8 rounded-xl shadow-sm border text-center text-slate-400 py-20">
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border text-center text-slate-400 py-12 md:py-20">
                         <i class="fas fa-chart-pie text-4xl mb-4"></i>
                         <p>Gráficos y Estadísticas aquí...</p>
                     </div>
@@ -110,44 +151,44 @@
                 <div id="module-registro" class="module-section hidden-section">
                     
                     <div id="registro-list-view" class="fade-in">
-                        <div class="flex justify-between items-center mb-6">
-                            <div class="flex gap-2">
-                                <input type="text" placeholder="Buscar por DNI o Nombre..." class="border rounded-lg px-4 py-2 w-64 outline-none focus:border-blue-500">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <div class="flex gap-2 w-full sm:w-auto">
+                                <input type="text" placeholder="Buscar por DNI..." class="border rounded-lg px-4 py-2 w-full sm:w-64 outline-none focus:border-blue-500">
                                 <button class="bg-slate-200 px-4 rounded-lg hover:bg-slate-300"><i class="fas fa-search"></i></button>
                             </div>
-                            <button onclick="toggleView('registro', 'form')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow font-bold">
+                            <button onclick="toggleView('registro', 'form')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow font-bold w-full sm:w-auto">
                                 <i class="fas fa-plus mr-2"></i> Nuevo Colegiado
                             </button>
                         </div>
 
-                        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                        <div class="bg-white rounded-xl shadow-sm border overflow-hidden table-container">
                             <table class="w-full text-left text-sm text-slate-600">
                                 <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-xs">
                                     <tr>
-                                        <th class="px-6 py-4">CBP N°</th>
-                                        <th class="px-6 py-4">Apellidos y Nombres</th>
-                                        <th class="px-6 py-4">DNI</th>
-                                        <th class="px-6 py-4 text-center">Estado</th>
-                                        <th class="px-6 py-4 text-center">Acciones</th>
+                                        <th class="px-3 md:px-6 py-4">CBP N°</th>
+                                        <th class="px-3 md:px-6 py-4">Apellidos y Nombres</th>
+                                        <th class="px-3 md:px-6 py-4 hidden sm:table-cell">DNI</th>
+                                        <th class="px-3 md:px-6 py-4 text-center hidden md:table-cell">Estado</th>
+                                        <th class="px-3 md:px-6 py-4 text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
                                     <tr class="hover:bg-slate-50">
-                                        <td class="px-6 py-4 font-mono font-bold text-blue-600">45099</td>
-                                        <td class="px-6 py-4 font-medium text-slate-900">Pérez García, Juan</td>
-                                        <td class="px-6 py-4">40123456</td>
-                                        <td class="px-6 py-4 text-center"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">Habilitado</span></td>
-                                        <td class="px-6 py-4 text-center">
+                                        <td class="px-3 md:px-6 py-4 font-mono font-bold text-blue-600">45099</td>
+                                        <td class="px-3 md:px-6 py-4 font-medium text-slate-900">Pérez García, Juan</td>
+                                        <td class="px-3 md:px-6 py-4 hidden sm:table-cell">40123456</td>
+                                        <td class="px-3 md:px-6 py-4 text-center hidden md:table-cell"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">Habilitado</span></td>
+                                        <td class="px-3 md:px-6 py-4 text-center">
                                             <button onclick="toggleView('registro', 'form')" class="text-blue-500 hover:text-blue-700 mx-1" title="Editar"><i class="fas fa-edit"></i></button>
                                             <button onclick="alert('¿Eliminar registro?')" class="text-red-500 hover:text-red-700 mx-1" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
                                         </td>
                                     </tr>
                                     <tr class="hover:bg-slate-50">
-                                        <td class="px-6 py-4 font-mono font-bold text-slate-400">--</td>
-                                        <td class="px-6 py-4 font-medium text-slate-900">Mendoza, Maria (Trámite)</td>
-                                        <td class="px-6 py-4">40999888</td>
-                                        <td class="px-6 py-4 text-center"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-bold">Pendiente</span></td>
-                                        <td class="px-6 py-4 text-center">
+                                        <td class="px-3 md:px-6 py-4 font-mono font-bold text-slate-400">--</td>
+                                        <td class="px-3 md:px-6 py-4 font-medium text-slate-900">Mendoza, Maria (Trámite)</td>
+                                        <td class="px-3 md:px-6 py-4 hidden sm:table-cell">40999888</td>
+                                        <td class="px-3 md:px-6 py-4 text-center hidden md:table-cell"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-bold">Pendiente</span></td>
+                                        <td class="px-3 md:px-6 py-4 text-center">
                                             <button onclick="toggleView('registro', 'form')" class="text-blue-500 hover:text-blue-700 mx-1"><i class="fas fa-edit"></i></button>
                                             <button class="text-red-500 hover:text-red-700 mx-1"><i class="fas fa-trash-alt"></i></button>
                                         </td>
@@ -160,14 +201,14 @@
                     <div id="registro-form-view" class="hidden-section fade-in">
                         <div class="bg-white rounded-xl shadow-lg border overflow-hidden max-w-4xl mx-auto">
                             <div class="bg-blue-600 p-4 flex justify-between items-center text-white">
-                                <h3 class="font-bold"><i class="fas fa-user-edit mr-2"></i> Gestión de Colegiado</h3>
-                                <button onclick="toggleView('registro', 'list')" class="bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded text-sm">
+                                <h3 class="font-bold text-sm md:text-base"><i class="fas fa-user-edit mr-2"></i> Gestión de Colegiado</h3>
+                                <button onclick="toggleView('registro', 'list')" class="bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded text-xs md:text-sm">
                                     <i class="fas fa-times mr-1"></i> Cancelar
                                 </button>
                             </div>
-                            <div class="p-8">
+                            <div class="p-4 md:p-8">
                                 <form>
-                                    <div class="grid grid-cols-2 gap-6 mb-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                                         <div>
                                             <label class="block text-sm font-bold text-slate-700 mb-1">DNI</label>
                                             <input type="text" class="w-full border rounded p-2" placeholder="Ingrese DNI">
@@ -185,7 +226,7 @@
                                             <input type="text" class="w-full border rounded p-2">
                                         </div>
                                     </div>
-                                    <div class="flex justify-end gap-3 pt-4 border-t">
+                                    <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
                                         <button type="button" onclick="toggleView('registro', 'list')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded">Cancelar</button>
                                         <button type="button" onclick="alert('Datos Guardados'); toggleView('registro', 'list')" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Guardar Cambios</button>
                                     </div>
@@ -196,16 +237,17 @@
                 </div>
 
                 <div id="module-pagos" class="module-section hidden-section">
-                    <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+                    <div class="bg-white rounded-xl shadow-sm border p-4 md:p-6 mb-6">
                         <h3 class="font-bold text-slate-700 mb-4">Caja / Cobranza</h3>
-                        <div class="flex gap-4 items-end mb-6">
-                            <div class="flex-1">
+                        <div class="flex flex-col sm:flex-row gap-4 items-end mb-6">
+                            <div class="flex-1 w-full">
                                 <label class="text-sm text-slate-500">Buscar Colegiado</label>
                                 <input type="text" placeholder="Ingrese Código o DNI" class="w-full border rounded px-3 py-2 mt-1">
                             </div>
-                            <button class="bg-blue-600 text-white px-6 py-2 rounded font-bold h-10">Buscar</button>
+                            <button class="bg-blue-600 text-white px-6 py-2 rounded font-bold h-10 w-full sm:w-auto">Buscar</button>
                         </div>
-                        <table class="w-full text-sm text-left">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
                             <thead class="bg-slate-100 font-bold text-slate-700">
                                 <tr>
                                     <th class="p-3 w-10"><input type="checkbox" checked></th>
@@ -227,24 +269,25 @@
                                 </tr>
                             </tfoot>
                         </table>
+                        </div>
                         <div class="mt-4 text-right">
-                            <button class="bg-emerald-500 text-white px-6 py-2 rounded font-bold hover:bg-emerald-600">Procesar Pago</button>
+                            <button class="bg-emerald-500 text-white px-6 py-2 rounded font-bold hover:bg-emerald-600 w-full sm:w-auto">Procesar Pago</button>
                         </div>
                     </div>
                 </div>
 
                 <div id="module-carnes" class="module-section hidden-section">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
                         <div>
                             <div class="bg-white rounded-xl shadow border">
                                 <div class="p-4 border-b font-bold text-slate-700">Cola de Impresión</div>
                                 <div class="p-4 space-y-2">
                                     <div class="flex justify-between items-center p-2 border rounded hover:bg-blue-50 cursor-pointer">
-                                        <span class="text-sm font-bold">Juan Pérez (CBP-45099)</span>
+                                        <span class="text-xs md:text-sm font-bold">Juan Pérez (CBP-45099)</span>
                                         <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Pendiente</span>
                                     </div>
                                     <div class="flex justify-between items-center p-2 border rounded hover:bg-blue-50 cursor-pointer">
-                                        <span class="text-sm font-bold">Ana Silva (CBP-45100)</span>
+                                        <span class="text-xs md:text-sm font-bold">Ana Silva (CBP-45100)</span>
                                         <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Pendiente</span>
                                     </div>
                                 </div>
@@ -256,7 +299,7 @@
                             </div>
                         </div>
                         <div class="flex flex-col items-center justify-center">
-                            <div class="carnet-card w-80 h-52 rounded-xl p-4 relative shadow-2xl">
+                            <div class="carnet-card w-full max-w-sm md:w-80 h-48 md:h-52 rounded-xl p-4 relative shadow-2xl">
                                 <div class="flex justify-between items-start mb-4">
                                     <i class="fas fa-microscope text-2xl"></i>
                                     <span class="text-xs font-bold opacity-80 border border-white px-1 rounded">VIGENTE 2026</span>
@@ -277,28 +320,28 @@
                 <div id="module-cursos" class="module-section hidden-section">
                     
                     <div id="cursos-list-view" class="fade-in">
-                        <div class="flex justify-between items-center mb-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                             <h3 class="font-bold text-slate-700">Gestión de Eventos Académicos</h3>
-                            <button onclick="toggleView('cursos', 'form')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow font-bold">
+                            <button onclick="toggleView('cursos', 'form')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow font-bold w-full sm:w-auto">
                                 <i class="fas fa-plus mr-2"></i> Nuevo Evento
                             </button>
                         </div>
-                        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                        <div class="bg-white rounded-xl shadow-sm border overflow-hidden table-container">
                             <table class="w-full text-left text-sm text-slate-600">
                                 <thead class="bg-slate-100 font-bold uppercase text-xs">
                                     <tr>
-                                        <th class="px-6 py-4">Fecha</th>
-                                        <th class="px-6 py-4">Nombre del Evento</th>
-                                        <th class="px-6 py-4 text-center">Inscritos</th>
-                                        <th class="px-6 py-4 text-center">Acciones</th>
+                                        <th class="px-3 md:px-6 py-4">Fecha</th>
+                                        <th class="px-3 md:px-6 py-4">Nombre del Evento</th>
+                                        <th class="px-3 md:px-6 py-4 text-center hidden sm:table-cell">Inscritos</th>
+                                        <th class="px-3 md:px-6 py-4 text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
                                     <tr class="hover:bg-slate-50">
-                                        <td class="px-6 py-4">15/01/2026</td>
-                                        <td class="px-6 py-4 font-bold">Congreso Nacional Biología</td>
-                                        <td class="px-6 py-4 text-center">150</td>
-                                        <td class="px-6 py-4 text-center">
+                                        <td class="px-3 md:px-6 py-4">15/01/2026</td>
+                                        <td class="px-3 md:px-6 py-4 font-bold">Congreso Nacional Biología</td>
+                                        <td class="px-3 md:px-6 py-4 text-center hidden sm:table-cell">150</td>
+                                        <td class="px-3 md:px-6 py-4 text-center">
                                             <button onclick="toggleView('cursos', 'form')" class="text-blue-500 mx-1"><i class="fas fa-edit"></i></button>
                                             <button class="text-red-500 mx-1"><i class="fas fa-trash-alt"></i></button>
                                         </td>
@@ -309,14 +352,14 @@
                     </div>
 
                     <div id="cursos-form-view" class="hidden-section fade-in">
-                        <div class="bg-white rounded-xl shadow p-6 max-w-2xl mx-auto border">
+                        <div class="bg-white rounded-xl shadow p-4 md:p-6 max-w-2xl mx-auto border">
                             <h3 class="font-bold text-lg mb-4 text-slate-800">Crear / Editar Evento</h3>
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-bold text-slate-700">Nombre del Evento</label>
                                     <input type="text" class="w-full border rounded p-2">
                                 </div>
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-bold text-slate-700">Fecha</label>
                                         <input type="date" class="w-full border rounded p-2">
@@ -326,7 +369,7 @@
                                         <input type="number" class="w-full border rounded p-2">
                                     </div>
                                 </div>
-                                <div class="flex justify-end gap-3 pt-4">
+                                <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4">
                                     <button onclick="toggleView('cursos', 'list')" class="px-4 py-2 border rounded hover:bg-slate-50">Cancelar</button>
                                     <button onclick="toggleView('cursos', 'list')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Guardar</button>
                                 </div>
@@ -356,8 +399,24 @@
             location.reload();
         }
 
+        // --- SIDEBAR MÓVIL ---
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
         // --- NAVEGACIÓN ENTRE MÓDULOS ---
         function showModule(moduleId) {
+            // Cerrar sidebar en móvil al cambiar de módulo
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+            
             // Ocultar todos los módulos
             document.querySelectorAll('.module-section').forEach(el => el.classList.add('hidden-section'));
             
